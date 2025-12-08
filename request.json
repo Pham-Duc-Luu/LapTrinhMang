@@ -1,0 +1,14 @@
+{
+  "header": {
+    "messageId": "123",
+    "timestamp": "2025-11-25T21:00:00Z",
+    "clientId": "clientA",
+    "action": "LOGIN"
+  },
+  "body": {
+    "data": {
+      "phoneNumber": "0987654321",
+      "password": "123456"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "M001",
+    "title": "Avengers: Endgame",
+    "duration": 180,
+    "category": ["action", "sci-fi", "adventure"],
+    "description": "Earth's mightiest heroes unite for one final stand against Thanos.",
+    "rating": 8.5
+  },
+  {
+    "id": "M002",
+    "title": "Inception",
+    "duration": 148,
+    "category": ["sci-fi", "thriller"],
+    "description": "A thief who enters the dreams of others must perform the ultimate inception.",
+    "rating": 9.0
+  },
+  {
+    "id": "M003",
+    "title": "The Dark Knight",
+    "duration": 152,
+    "category": ["action", "crime", "drama"],
+    "description": "Batman faces the Joker in a battle for Gotham's soul.",
+    "rating": 9.1
+  },
+  {
+    "id": "M004",
+    "title": "Spirited Away",
+    "duration": 125,
+    "category": ["animation", "fantasy"],
+    "description": "A young girl enters a magical world of spirits and must find her way home.",
+    "rating": 8.6
+  }
+]

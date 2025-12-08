@@ -1,0 +1,73 @@
+[
+  {
+    "id": "S001",
+    "movie_id": "M001",
+    "movie_title": "Avengers",
+    "room": "Room 1",
+    "date": "2025-10-28",
+    "time": "19:00",
+    "price": 120000,
+    "booked_seats": [
+      {
+        "username": "luu",
+        "seat": "A1"
+      }
+    ],
+    "available_seats": 45
+  },
+  {
+    "id": "S002",
+    "movie_id": "M001",
+    "movie_title": "Avengers",
+    "room": "Room 2",
+    "date": "2025-10-28",
+    "booked_seats": ["A1", "A2", "B3"],
+    "time": "21:30",
+    "price": 120000,
+    "available_seats": 32
+  },
+  {
+    "id": "S003",
+    "movie_id": "M002",
+    "movie_title": "Inception",
+    "room": "Room 3",
+    "booked_seats": ["A1", "A2", "B3"],
+    "date": "2025-10-28",
+    "time": "18:30",
+    "price": 110000,
+    "available_seats": 50
+  },
+  {
+    "id": "S004",
+    "movie_id": "M002",
+    "movie_title": "Inception",
+    "room": "Room 1",
+    "booked_seats": ["A1", "A2", "B3"],
+    "date": "2025-10-29",
+    "time": "20:00",
+    "price": 110000,
+    "available_seats": 48
+  },
+  {
+    "id": "S005",
+    "booked_seats": ["A1", "A2", "B3"],
+    "movie_id": "M003",
+    "movie_title": "Inception",
+    "room": "Room 2",
+    "date": "2025-10-29",
+    "time": "17:30",
+    "price": 110000,
+    "available_seats": 52
+  },
+  {
+    "id": "S006",
+    "movie_id": "M004",
+    "movie_title": "Inception",
+    "booked_seats": ["A1", "A2", "B3"],
+    "room": "Room 4",
+    "date": "2025-10-30",
+    "time": "19:30",
+    "price": 110000,
+    "available_seats": 60
+  }
+]

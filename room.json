@@ -1,0 +1,108 @@
+[
+  {
+    "id": "P001",
+    "name": "Room 1",
+    "showtime": [
+      {
+        "showtime_id": "S001",
+        "start_time": "1761660717",
+        "movie_id": "M001",
+        "seats": [
+          { "position": "A1", "user_registed": "U001" },
+          { "position": "A2", "user_registed": null },
+          { "position": "A3", "user_registed": null },
+          { "position": "B1", "user_registed": "U002" },
+          { "position": "B2", "user_registed": null }
+        ]
+      },
+      {
+        "showtime_id": "S002",
+        "start_time": "1761667917",
+        "movie_id": "M002",
+        "seats": [
+          { "position": "A1", "user_registed": null },
+          { "position": "A2", "user_registed": null },
+          { "position": "B1", "user_registed": "U003" },
+          { "position": "B2", "user_registed": null }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P002",
+    "name": "Room 2",
+    "showtime": [
+      {
+        "showtime_id": "S003",
+        "start_time": "1761671517",
+        "movie_id": "M003",
+        "seats": [
+          { "position": "A1", "user_registed": null },
+          { "position": "A2", "user_registed": null },
+          { "position": "A3", "user_registed": null },
+          { "position": "B1", "user_registed": null },
+          { "position": "B2", "user_registed": null }
+        ]
+      },
+      {
+        "showtime_id": "S004",
+        "start_time": "1761678717",
+        "movie_id": "M001",
+        "seats": [
+          { "position": "A1", "user_registed": "U004" },
+          { "position": "A2", "user_registed": null },
+          { "position": "B1", "user_registed": "U005" },
+          { "position": "B2", "user_registed": null }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P003",
+    "name": "Room 3",
+    "showtime": [
+      {
+        "showtime_id": "S005",
+        "start_time": "1761682317",
+        "movie_id": "M004",
+        "seats": [
+          { "position": "A1", "user_registed": "U006" },
+          { "position": "A2", "user_registed": "U007" },
+          { "position": "A3", "user_registed": null },
+          { "position": "B1", "user_registed": "U008" },
+          { "position": "B2", "user_registed": null }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "P004",
+    "name": "Room 4",
+    "showtime": [
+      {
+        "showtime_id": "S006",
+        "start_time": "1761685917",
+        "movie_id": "M005",
+        "seats": [
+          { "position": "A1", "user_registed": null },
+          { "position": "A2", "user_registed": null },
+          { "position": "A3", "user_registed": null },
+          { "position": "B1", "user_registed": null },
+          { "position": "B2", "user_registed": null }
+        ]
+      },
+      {
+        "showtime_id": "S007",
+        "start_time": "1761689517",
+        "movie_id": "M002",
+        "seats": [
+          { "position": "A1", "user_registed": "U009" },
+          { "position": "A2", "user_registed": null },
+          { "position": "A3", "user_registed": "U010" },
+          { "position": "B1", "user_registed": null },
+          { "position": "B2", "user_registed": "U011" }
+        ]
+      }
+    ]
+  }
+]
