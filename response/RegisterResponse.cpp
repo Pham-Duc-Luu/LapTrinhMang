@@ -1,8 +1,24 @@
 #include "RegisterResponse.h"
+#include <iostream>
+#include <ctime>
 
+/* ===== Utility ===== */
+static std::string nowISO8601() {
+    return "ISO8601"; // demo đơn giản, bạn có thể format time thật
+}
+
+/* ===== Convert Response -> JSON ===== */
 json RegisterResponse::to_json() const {
-    json body;
+    json header = {
+        {"messageId", messageId},
+        {"timestamp", timestamp},
+        {"status", status},
+        {"code", code},
+        {"action", action},
+        {"message", message}
+    };
 
+    json body;
     if (!isError) {
         body["data"] = {
             {"userId", data.userId}
@@ -15,57 +31,130 @@ json RegisterResponse::to_json() const {
             err["phoneNumber"] = error.phoneNumber;
 
         err["description"] = error.description;
-
         body["error"] = err;
     }
 
-    return json{
-        {"header", {
-            {"messageId", messageId},
-            {"timestamp", timestamp},
-            {"clientId", clientId},
-            {"action", action},
-            {"status", status},
-            {"code", code},
-            {"message", message}
-        }},
+    return {
+        {"header", header},
         {"body", body}
     };
 }
 
-RegisterResponse RegisterResponse::from_json(const json &j) {
+/* ===== Handle Register Logic ===== */
+RegisterResponse RegisterResponse::handleRegister(
+    const json& request,
+    sqlite3* db
+) {
     RegisterResponse res;
+    res.action = "REGISTER";
+    res.timestamp = nowISO8601();
 
-    if (j.contains("header")) {
-        auto h = j["header"];
-        res.messageId = h.value("messageId", "");
-        res.timestamp = h.value("timestamp", "");
-        res.clientId  = h.value("clientId", "");
-        res.action    = h.value("action", "");
-        res.status    = h.value("status", "");
-        res.code      = h.value("code", 0);
-        res.message   = h.value("message", "");
+    /* ===== Parse Header ===== */
+    auto h = request["header"];
+    res.messageId = h.value("messageId", "");
+    res.clientId  = h.value("clientId", "");
+
+    /* ===== Parse Body ===== */
+    if (!request.contains("body") || !request["body"].contains("data")) {
+        res.isError = true;
+        res.status = "Bad Request";
+        res.code = 400;
+        res.message = "MISSING_REQUIRED_FIELD";
+        res.error.description = "body.data is required";
+        return res;
     }
 
-    if (j.contains("body")) {
-        auto b = j["body"];
+    auto d = request["body"]["data"];
+    std::string phone = d.value("phoneNumber", "");
+    std::string pass  = d.value("password", "");
+    std::string name  = d.value("fullName", "");
 
-        // SUCCESS CASE
-        if (b.contains("data")) {
-            res.isError = false;
-            auto d = b["data"];
-            res.data.userId = d.value("userId", "");
-        }
-        // ERROR CASE
-        else if (b.contains("error")) {
-            res.isError = true;
-            auto e = b["error"];
-
-            res.error.field       = e.value("field", "");
-            res.error.phoneNumber = e.value("phoneNumber", "");
-            res.error.description = e.value("description", "");
-        }
+    /* ===== Missing field ===== */
+    if (phone.empty()) {
+        res.isError = true;
+        res.status = "Bad Request";
+        res.code = 400;
+        res.message = "MISSING_REQUIRED_FIELD";
+        res.error.field = "phoneNumber";
+        res.error.description = "phoneNumber is required";
+        return res;
     }
+
+    if (pass.empty()) {
+        res.isError = true;
+        res.status = "Bad Request";
+        res.code = 400;
+        res.message = "MISSING_REQUIRED_FIELD";
+        res.error.field = "password";
+        res.error.description = "password is required";
+        return res;
+    }
+
+    if (name.empty()) {
+        res.isError = true;
+        res.status = "Bad Request";
+        res.code = 400;
+        res.message = "MISSING_REQUIRED_FIELD";
+        res.error.field = "fullName";
+        res.error.description = "fullName is required";
+        return res;
+    }
+
+    /* ===== Check duplicate phone ===== */
+    const char* checkSQL =
+        "SELECT userId FROM users WHERE phoneNumber = ?";
+
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, checkSQL, -1, &stmt, nullptr);
+    sqlite3_bind_text(stmt, 1, phone.c_str(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        sqlite3_finalize(stmt);
+
+        res.isError = true;
+        res.status = "Conflict";
+        res.code = 409;
+        res.message = "PHONENUMBER_EXISTED";
+        res.error.phoneNumber = phone;
+        res.error.description =
+            "This phone number is already registered";
+        return res;
+    }
+    sqlite3_finalize(stmt);
+
+    /* ===== Insert user ===== */
+    std::string userId = "U" + phone.substr(phone.length() - 3);
+
+    const char* insertSQL =
+        "INSERT INTO users(userId, phoneNumber, password, fullName) "
+        "VALUES (?, ?, ?, ?)";
+
+    sqlite3_prepare_v2(db, insertSQL, -1, &stmt, nullptr);
+    sqlite3_bind_text(stmt, 1, userId.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, phone.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, pass.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, name.c_str(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        sqlite3_finalize(stmt);
+
+        res.isError = true;
+        res.status = "Internal Server Error";
+        res.code = 500;
+        res.message = "INTERNAL_SERVER_ERROR";
+        res.error.description =
+            "Failed to register user due to unexpected server error";
+        return res;
+    }
+
+    sqlite3_finalize(stmt);
+
+    /* ===== Success ===== */
+    res.isError = false;
+    res.status = "SUCCESS";
+    res.code = 200;
+    res.message = "Register successful";
+    res.data.userId = userId;
 
     return res;
 }

@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include <sqlite3.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
+/* ===== Response Data ===== */
 struct LoginResponseData {
     std::string userId;
 };
@@ -23,12 +25,16 @@ public:
     int code = 0;
     std::string message;
 
-    // Body – success or error
+    // Body
+    bool isError = false;
     LoginResponseData data;
     LoginResponseError error;
 
-    bool isError = false;
-
     json to_json() const;
-    static LoginResponse from_json(const json &j);
+
+    // xử lý login
+    static LoginResponse handleLogin(
+        const json& request,
+        sqlite3* db
+    );
 };

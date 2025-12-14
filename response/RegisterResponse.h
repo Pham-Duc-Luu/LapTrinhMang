@@ -1,16 +1,25 @@
 #pragma once
 #include <string>
+#include <sqlite3.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
+/* ===== Request Data ===== */
+struct RegisterRequestData {
+    std::string phoneNumber;
+    std::string password;
+    std::string fullName;
+};
+
+/* ===== Response Data ===== */
 struct RegisterResponseData {
     std::string userId;
 };
 
 struct RegisterResponseError {
-    std::string field;       // optional: used only for missing field errors
-    std::string phoneNumber; // optional: used only for duplicate phone
+    std::string field;       // dùng cho lỗi thiếu field
+    std::string phoneNumber; // dùng cho lỗi trùng số
     std::string description;
 };
 
@@ -25,12 +34,16 @@ public:
     int code = 0;
     std::string message;
 
-    // Body: success OR error
+    // Body
     bool isError = false;
-
     RegisterResponseData data;
     RegisterResponseError error;
 
     json to_json() const;
-    static RegisterResponse from_json(const json &j);
+
+    // xử lý đăng ký
+    static RegisterResponse handleRegister(
+        const json& request,
+        sqlite3* db
+    );
 };
