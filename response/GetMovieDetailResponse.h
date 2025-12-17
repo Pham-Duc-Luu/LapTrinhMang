@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GET_MOVIE_DETAIL_RESPONSE_H
+#define GET_MOVIE_DETAIL_RESPONSE_H
+
 #include <string>
 #include <vector>
 #include <sqlite3.h>
@@ -6,14 +8,16 @@
 
 using json = nlohmann::json;
 
-/* ===== Models ===== */
+/* ===== Showtime ===== */
 struct Showtime {
     std::string id;
-    std::string dateTime;
+    std::string startTime;
+    std::string endTime;
     std::string room;
 };
 
-struct MovieDetail {
+/* ===== Movie Data ===== */
+struct MovieDetailData {
     std::string movieId;
     std::string title;
     std::string description;
@@ -23,6 +27,7 @@ struct MovieDetail {
     std::vector<Showtime> showtimes;
 };
 
+/* ===== Error ===== */
 struct MovieDetailError {
     std::string movieId;
     std::string description;
@@ -31,7 +36,7 @@ struct MovieDetailError {
 /* ===== Response ===== */
 class GetMovieDetailResponse {
 public:
-    // Header
+    /* header */
     std::string messageId;
     std::string timestamp;
     std::string status;
@@ -39,9 +44,9 @@ public:
     std::string action;
     std::string message;
 
-    // Body
+    /* body */
     bool isError = false;
-    MovieDetail data;
+    MovieDetailData data;
     MovieDetailError error;
 
     json to_json() const;
@@ -51,3 +56,5 @@ public:
         sqlite3* db
     );
 };
+
+#endif

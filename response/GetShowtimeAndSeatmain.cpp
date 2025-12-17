@@ -1,20 +1,18 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <nlohmann/json.hpp>
-#include "CreateShowtimeResponse.h"
+#include "GetShowtimeAndSeatResponse.h"
 
 using json = nlohmann::json;
 
 int main() {
-    sqlite3* db = nullptr;
-
+    sqlite3* db;
     if (sqlite3_open("cinema.db", &db) != SQLITE_OK) {
-        std::cerr << "Cannot open database: "
-                  << sqlite3_errmsg(db) << std::endl;
+        std::cout << "Cannot open database\n";
         return 1;
     }
 
-    std::cout << "Enter CREATE_SHOWTIME JSON:\n";
+    std::cout << "Enter SHOWTIME_AND_SEAT JSON:\n";
 
     std::string input, line;
     while (std::getline(std::cin, line)) {
@@ -24,8 +22,8 @@ int main() {
 
     json request = json::parse(input);
 
-    CreateShowtimeResponse response =
-        CreateShowtimeResponse::handle(request, db);
+    GetShowtimeAndSeatResponse response =
+        GetShowtimeAndSeatResponse::handle(request, db);
 
     std::cout << "\n===== RESPONSE =====\n";
     std::cout << response.to_json().dump(4) << std::endl;

@@ -25,73 +25,91 @@ int main() {
 
     // 2. SQL tạo bảng
     const char* sql =
-        // Users
-        "CREATE TABLE IF NOT EXISTS users ("
-        "  userId TEXT PRIMARY KEY,"
-        "  phoneNumber TEXT UNIQUE,"
-        "  password TEXT,"
-        "  fullName TEXT"
-        ");"
+    // Users
+    "CREATE TABLE IF NOT EXISTS users ("
+    "  userId TEXT PRIMARY KEY,"
+    "  phoneNumber TEXT UNIQUE,"
+    "  password TEXT,"
+    "  fullName TEXT"
+    ");"
 
-        // Movies
-        "CREATE TABLE IF NOT EXISTS movies ("
-        "  movieId TEXT PRIMARY KEY,"
-        "  title TEXT,"
-        "  description TEXT,"
-        "  duration INTEGER,"
-        "  posterUrl TEXT"
-        ");"
+    // Admins
+    "CREATE TABLE IF NOT EXISTS admins ("
+    "  adminId TEXT PRIMARY KEY,"
+    "  username TEXT UNIQUE,"
+    "  password TEXT,"
+    "  role TEXT"
+    ");"
 
-        // Movie Actors
-        "CREATE TABLE IF NOT EXISTS movie_actors ("
-        "  movieId TEXT,"
-        "  actorName TEXT,"
-        "  PRIMARY KEY (movieId, actorName),"
-        "  FOREIGN KEY (movieId) REFERENCES movies(movieId)"
-        ");"
+    // Movies
+    "CREATE TABLE IF NOT EXISTS movies ("
+    "  movieId TEXT PRIMARY KEY,"
+    "  title TEXT,"
+    "  description TEXT,"
+    "  duration INTEGER,"
+    "  posterUrl TEXT"
+    ");"
 
-        // Showtimes
-        "CREATE TABLE IF NOT EXISTS showtimes ("
-        "  showtimeId TEXT PRIMARY KEY,"
-        "  movieId TEXT,"
-        "  dateTime TEXT,"
-        "  room TEXT,"
-        "  FOREIGN KEY (movieId) REFERENCES movies(movieId)"
-        ");"
+    // Movie Actors
+    "CREATE TABLE IF NOT EXISTS movie_actors ("
+    "  movieId TEXT,"
+    "  actorName TEXT,"
+    "  PRIMARY KEY (movieId, actorName),"
+    "  FOREIGN KEY (movieId) REFERENCES movies(movieId)"
+    ");"
 
-        // Seats
-        "CREATE TABLE IF NOT EXISTS seats ("
-        "  seatId TEXT PRIMARY KEY"
-        ");"
+    // Rooms
+    "CREATE TABLE IF NOT EXISTS rooms ("
+    "  roomId TEXT PRIMARY KEY,"
+    "  roomName TEXT"
+    ");"
 
-        // Showtime Seats
-        "CREATE TABLE IF NOT EXISTS showtime_seats ("
-        "  showtimeId TEXT,"
-        "  seatId TEXT,"
-        "  isReserved INTEGER,"
-        "  PRIMARY KEY (showtimeId, seatId),"
-        "  FOREIGN KEY (showtimeId) REFERENCES showtimes(showtimeId),"
-        "  FOREIGN KEY (seatId) REFERENCES seats(seatId)"
-        ");"
+    // Seats
+    "CREATE TABLE IF NOT EXISTS seats ("
+    "  seatId TEXT PRIMARY KEY"
+    ");"
 
-        // Reservations
-        "CREATE TABLE IF NOT EXISTS reservations ("
-        "  reservationId TEXT PRIMARY KEY,"
-        "  userId TEXT,"
-        "  showtimeId TEXT,"
-        "  expiresAt TEXT,"
-        "  FOREIGN KEY (userId) REFERENCES users(userId),"
-        "  FOREIGN KEY (showtimeId) REFERENCES showtimes(showtimeId)"
-        ");"
+    // Showtimes
+    "CREATE TABLE IF NOT EXISTS showtimes ("
+    "  showtimeId TEXT PRIMARY KEY,"
+    "  movieId TEXT,"
+    "  roomId TEXT,"
+    "  startTime TEXT,"
+    "  endTime TEXT,"
+    "  price INTEGER,"
+    "  FOREIGN KEY (movieId) REFERENCES movies(movieId),"
+    "  FOREIGN KEY (roomId) REFERENCES rooms(roomId)"
+    ");"
 
-        // Reservation Seats
-        "CREATE TABLE IF NOT EXISTS reservation_seats ("
-        "  reservationId TEXT,"
-        "  seatId TEXT,"
-        "  PRIMARY KEY (reservationId, seatId),"
-        "  FOREIGN KEY (reservationId) REFERENCES reservations(reservationId),"
-        "  FOREIGN KEY (seatId) REFERENCES seats(seatId)"
-        ");";
+    // Showtime Seats
+    "CREATE TABLE IF NOT EXISTS showtime_seats ("
+    "  showtimeId TEXT,"
+    "  seatId TEXT,"
+    "  isReserved INTEGER DEFAULT 0,"
+    "  PRIMARY KEY (showtimeId, seatId),"
+    "  FOREIGN KEY (showtimeId) REFERENCES showtimes(showtimeId),"
+    "  FOREIGN KEY (seatId) REFERENCES seats(seatId)"
+    ");"
+
+    // Reservations
+    "CREATE TABLE IF NOT EXISTS reservations ("
+    "  reservationId TEXT PRIMARY KEY,"
+    "  userId TEXT,"
+    "  showtimeId TEXT,"
+    "  expiresAt TEXT,"
+    "  FOREIGN KEY (userId) REFERENCES users(userId),"
+    "  FOREIGN KEY (showtimeId) REFERENCES showtimes(showtimeId)"
+    ");"
+
+    // Reservation Seats
+    "CREATE TABLE IF NOT EXISTS reservation_seats ("
+    "  reservationId TEXT,"
+    "  seatId TEXT,"
+    "  PRIMARY KEY (reservationId, seatId),"
+    "  FOREIGN KEY (reservationId) REFERENCES reservations(reservationId),"
+    "  FOREIGN KEY (seatId) REFERENCES seats(seatId)"
+    ");";
+
 
     // 3. Thực thi SQL
     executeSQL(db, sql);

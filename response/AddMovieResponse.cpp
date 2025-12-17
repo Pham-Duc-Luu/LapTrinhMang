@@ -1,4 +1,5 @@
 #include "AddMovieResponse.h"
+#include <iostream>
 
 /* ===== Fake time ===== */
 static std::string nowISO8601() {
@@ -60,12 +61,12 @@ AddMovieResponse AddMovieResponse::handle(
 
     auto d = request["body"]["data"];
 
-    std::string title       = d.value("title", "");
-    std::string description = d.value("description", "");
-    int duration            = d.value("duration", 0);
-    std::string posterUrl   = d.value("posterUrl", "");
+    std::string title        = d.value("title", "");
+    std::string description  = d.value("description", "");
+    int duration             = d.value("duration", 0);
+    std::string posterUrl    = d.value("posterUrl", "");
 
-    /* ===== Missing title ===== */
+    /* ===== Validate fields ===== */
     if (title.empty()) {
         res.isError = true;
         res.status = "Bad Request";
@@ -76,7 +77,6 @@ AddMovieResponse AddMovieResponse::handle(
         return res;
     }
 
-    /* ===== Missing description ===== */
     if (description.empty()) {
         res.isError = true;
         res.status = "Bad Request";
@@ -87,7 +87,6 @@ AddMovieResponse AddMovieResponse::handle(
         return res;
     }
 
-    /* ===== Invalid duration ===== */
     if (duration <= 0) {
         res.isError = true;
         res.status = "Bad Request";
@@ -98,7 +97,6 @@ AddMovieResponse AddMovieResponse::handle(
         return res;
     }
 
-    /* ===== Missing posterUrl ===== */
     if (posterUrl.empty()) {
         res.isError = true;
         res.status = "Bad Request";
@@ -109,9 +107,20 @@ AddMovieResponse AddMovieResponse::handle(
         return res;
     }
 
-    /* ===== Generate movieId ===== */
-    static int movieCounter = 10;
-    std::string movieId = "M" + std::to_string(movieCounter++);
+    /* ===== Generate movieId from DB (SAFE) ===== */
+    const char* idSQL =
+        "SELECT 'M' || printf('%03d', "
+        "IFNULL(MAX(CAST(substr(movieId,2) AS INT)), 0) + 1) "
+        "FROM movies";
+
+    sqlite3_stmt* idStmt;
+    sqlite3_prepare_v2(db, idSQL, -1, &idStmt, nullptr);
+    sqlite3_step(idStmt);
+
+    std::string movieId =
+        reinterpret_cast<const char*>(sqlite3_column_text(idStmt, 0));
+
+    sqlite3_finalize(idStmt);
 
     /* ===== Insert into DB ===== */
     const char* sql =
@@ -120,13 +129,18 @@ AddMovieResponse AddMovieResponse::handle(
 
     sqlite3_stmt* stmt;
     sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
     sqlite3_bind_text(stmt, 1, movieId.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, title.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, description.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_int(stmt, 4, duration);
     sqlite3_bind_text(stmt, 5, posterUrl.c_str(), -1, SQLITE_STATIC);
 
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
+    int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "SQLite error: "
+                  << sqlite3_errmsg(db) << std::endl;
+
         sqlite3_finalize(stmt);
 
         res.isError = true;

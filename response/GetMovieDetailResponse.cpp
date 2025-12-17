@@ -1,11 +1,11 @@
 #include "GetMovieDetailResponse.h"
 
-/* ===== Fake time ===== */
+/* ===== Fake ISO8601 ===== */
 static std::string nowISO8601() {
-    return "ISO8601";
+    return "2025-12-22T10:00:00Z";
 }
 
-/* ===== to_json ===== */
+/* ===== Convert response to JSON ===== */
 json GetMovieDetailResponse::to_json() const {
     json header = {
         {"messageId", messageId},
@@ -23,7 +23,8 @@ json GetMovieDetailResponse::to_json() const {
         for (const auto& s : data.showtimes) {
             showtimesJson.push_back({
                 {"id", s.id},
-                {"dateTime", s.dateTime},
+                {"startTime", s.startTime},
+                {"endTime", s.endTime},
                 {"room", s.room}
             });
         }
@@ -50,7 +51,7 @@ json GetMovieDetailResponse::to_json() const {
     };
 }
 
-/* ===== Handle UC04 ===== */
+/* ===== Handle GET_MOVIE_DETAIL ===== */
 GetMovieDetailResponse GetMovieDetailResponse::handle(
     const json& request,
     sqlite3* db
@@ -58,8 +59,9 @@ GetMovieDetailResponse GetMovieDetailResponse::handle(
     GetMovieDetailResponse res;
     res.action = "GET_MOVIE_DETAIL";
     res.timestamp = nowISO8601();
+    res.isError = false;
 
-    /* ===== Header ===== */
+    /* ===== Parse header ===== */
     auto h = request["header"];
     res.messageId = h.value("messageId", "");
 
@@ -72,7 +74,7 @@ GetMovieDetailResponse GetMovieDetailResponse::handle(
         "SELECT title, description, duration, posterUrl "
         "FROM movies WHERE movieId = ?";
 
-    sqlite3_stmt* stmt;
+    sqlite3_stmt* stmt = nullptr;
     sqlite3_prepare_v2(db, movieSQL, -1, &stmt, nullptr);
     sqlite3_bind_text(stmt, 1, movieId.c_str(), -1, SQLITE_STATIC);
 
@@ -99,7 +101,7 @@ GetMovieDetailResponse GetMovieDetailResponse::handle(
 
     sqlite3_finalize(stmt);
 
-    /* ===== Actors ===== */
+    /* ===== Query actors ===== */
     const char* actorSQL =
         "SELECT actorName FROM movie_actors WHERE movieId = ?";
 
@@ -113,9 +115,9 @@ GetMovieDetailResponse GetMovieDetailResponse::handle(
     }
     sqlite3_finalize(stmt);
 
-    /* ===== Showtimes ===== */
+    /* ===== Query showtimes (REQUIRED) ===== */
     const char* showtimeSQL =
-        "SELECT showtimeId, dateTime, room "
+        "SELECT showtimeId, startTime, endTime, roomId "
         "FROM showtimes WHERE movieId = ?";
 
     sqlite3_prepare_v2(db, showtimeSQL, -1, &stmt, nullptr);
@@ -123,15 +125,24 @@ GetMovieDetailResponse GetMovieDetailResponse::handle(
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         Showtime s;
-        s.id =
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        s.dateTime =
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        s.room =
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        s.id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); // showtimeId
+        s.startTime = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)); // startTime
+        s.endTime = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); // endTime
+        s.room = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); // roomId
         res.data.showtimes.push_back(s);
     }
     sqlite3_finalize(stmt);
+
+    /* ===== Showtime MUST exist ===== */
+    if (res.data.showtimes.empty()) {
+        res.isError = true;
+        res.status = "Not Found";
+        res.code = 404;
+        res.message = "SHOWTIME_NOT_FOUND";
+        res.error.movieId = movieId;
+        res.error.description = "No showtime available for this movie";
+        return res;
+    }
 
     /* ===== Success ===== */
     res.isError = false;
