@@ -1,5 +1,5 @@
-#ifndef GET_MOVIE_LIST_BY_NAME_RESPONSE_H
-#define GET_MOVIE_LIST_BY_NAME_RESPONSE_H
+#ifndef GET_MOVIE_DETAIL_RESPONSE_H
+#define GET_MOVIE_DETAIL_RESPONSE_H
 
 #include <string>
 #include <vector>
@@ -8,27 +8,33 @@
 
 using json = nlohmann::json;
 
-/* ===== Movie Item ===== */
-struct MovieItem {
-    std::string movieId;
-    std::string title;
-    int duration = 0;
-    std::string posterUrl;
+/* ===== Showtime ===== */
+struct Showtime {
+    std::string id;
+    std::string startTime;
+    std::string endTime;
+    std::string room;
 };
 
-/* ===== Data ===== */
-struct MovieListData {
-    std::vector<MovieItem> movies;
+/* ===== Movie Data ===== */
+struct MovieDetailData {
+    std::string movieId;
+    std::string title;
+    std::string description;
+    std::vector<std::string> actors;
+    int duration = 0;
+    std::string posterUrl;
+    std::vector<Showtime> showtimes;
 };
 
 /* ===== Error ===== */
-struct MovieListError {
-    std::string query;
+struct MovieDetailError {
+    std::string movieId;
     std::string description;
 };
 
 /* ===== Response ===== */
-class GetMovieListByNameResponse {
+class GetMovieDetailResponse {
 public:
     /* header */
     std::string messageId;
@@ -40,12 +46,12 @@ public:
 
     /* body */
     bool isError = false;
-    MovieListData data;
-    MovieListError error;
+    MovieDetailData data;
+    MovieDetailError error;
 
     json to_json() const;
 
-    static GetMovieListByNameResponse handle(
+    static GetMovieDetailResponse handle(
         const json& request,
         sqlite3* db
     );
