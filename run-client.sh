@@ -15,4 +15,4 @@ g++ client.cpp -o "$OUTPUT"
 
 # Nếu build thành công thì chạy
 echo "🚀 Running server..."
-./"$OUTPUT" 127.0.0.1 8080
+./"$OUTPUT" 127.0.0.1 12345
