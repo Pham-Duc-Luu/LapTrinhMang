@@ -71,7 +71,7 @@ std::string handleRequest(const std::string& input, sqlite3* db) {
 
     } else if (action == "GET_MOVIE_LIST_BY_NAME") {
         responseJson =
-            CreateShowtimeResponse::handle(request, db).to_json();
+            GetMovieListByNameResponse::handle(request, db).to_json();
 
     } else if (action == "UPDATE_SHOWTIME") {
         responseJson =
