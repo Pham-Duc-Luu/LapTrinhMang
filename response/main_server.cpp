@@ -9,6 +9,7 @@
 #include "AddMovieResponse.h"
 #include "CreateShowtimeResponse.h"
 #include "UpdateShowtimeResponse.h"
+#include "GetMovieListByNameResponse.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
