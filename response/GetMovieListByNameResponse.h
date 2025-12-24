@@ -1,35 +1,54 @@
-// #pragma once
-// #include <string>
-// #include <vector>
-// #include <nlohmann/json.hpp>
+#ifndef GET_MOVIE_LIST_BY_NAME_RESPONSE_H
+#define GET_MOVIE_LIST_BY_NAME_RESPONSE_H
 
-// using json = nlohmann::json;
+#include <string>
+#include <vector>
+#include <sqlite3.h>
+#include <nlohmann/json.hpp>
 
-// class GetMovieListByNameResponse
-// {
-// public:
-//     std::string messageId;
-//     std::string timestamp;
-//     std::string status;
-//     int code = 0;
-//     std::string message;
-//     std::string action;
+using json = nlohmann::json;
 
-//     struct MovieItem
-//     {
-//         std::string movieId;
-//         std::string title;
-//         std::string genre;
-//         int duration = 0;
-//         std::string posterUrl;
+/* ===== Movie Item ===== */
+struct MovieItem {
+    std::string movieId;
+    std::string title;
+    int duration = 0;
+    std::string posterUrl;
+};
 
-//         static MovieItem from_json(const json &j);
-//     };
+/* ===== Data ===== */
+struct MovieListData {
+    std::vector<MovieItem> movies;
+};
 
-//     struct BodyData
-//     {
-//         std::vector<MovieItem> movies;
-//     } data;
+/* ===== Error ===== */
+struct MovieListError {
+    std::string query;
+    std::string description;
+};
 
-//     static GetMovieListByNameResponse from_json(const json &j);
-// };
+/* ===== Response ===== */
+class GetMovieListByNameResponse {
+public:
+    /* header */
+    std::string messageId;
+    std::string timestamp;
+    std::string status;
+    int code = 0;
+    std::string action;
+    std::string message;
+
+    /* body */
+    bool isError = false;
+    MovieListData data;
+    MovieListError error;
+
+    json to_json() const;
+
+    static GetMovieListByNameResponse handle(
+        const json& request,
+        sqlite3* db
+    );
+};
+
+#endif
